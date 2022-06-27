@@ -1,0 +1,156 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <!--
+     ArcGIS API for JavaScript, https://js.arcgis.com
+     For more information about the widgets-timeslider sample,
+     read the original sample description at developers.arcgis.com.
+     https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider/index.html
+     -->
+    <title>TimeSlider widget | Sample | ArcGIS API for JavaScript 4.18</title>
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.24/esri/themes/dark/main.css"
+    />
+    <script src="/overrides/js.arcgis.com/4.24/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #timeSlider {
+        position: absolute;
+        left: 5%;
+        right: 5%;
+        bottom: 20px;
+      }
+      #layerToggle {
+        top: 60px;
+        right: 20px;
+        position: absolute;
+        z-index: 99;
+        border-radius: 8px;
+        padding: 10px;
+        opacity: 0.75;
+      }
+    </style>
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/WMSLayer",
+        "esri/widgets/TimeSlider",
+        "esri/widgets/Legend",
+      ], function (Map, MapView, WMSLayer, TimeSlider, Legend) {
+        var layer = new WMSLayer({
+          url: "https://my.cmems-du.eu/thredds/wms/med-hcmr-wav-rean-h",
+          sublayers: [
+            {
+              name: "VHM0",
+              legendUrl: "http://my.cmems-du.eu/thredds/wms/med-hcmr-wav-rean-h?REQUEST=GetLegendGraphic&LAYER=VHM0&PALETTE=alg",
+            },
+          ],
+          customParameters: {
+            "styles": "boxfill/alg",
+          },
+        });
+        var layer2 = new WMSLayer({
+          url: "https://my.cmems-du.eu/thredds/wms/cmems_mod_med_wav_myint_4.2km_PT1H-i",
+          sublayers: [
+            {
+              name: "VHM0",
+              legendUrl: "http://my.cmems-du.eu/thredds/wms/cmems_mod_med_wav_myint_4.2km_PT1H-i?REQUEST=GetLegendGraphic&LAYER=VHM0&PALETTE=alg",
+            },
+          ],
+          customParameters: {
+            "styles": "boxfill/alg",
+          },
+          visible: false,
+        });
+        const map = new Map({
+          basemap: "hybrid",
+          layers: [layer, layer2],
+        });
+        const view = new MapView({
+          map: map,
+          container: "viewDiv",
+          zoom: 7,
+          center: [34, 32.5]
+        });
+        /** The following should set automatically from the information returned in getCapabilities (layer.timeInfo.fullTimeExtent)
+        ---------------------------------------Start--------------------------------------**/
+        // start 4 hours ago
+        const start = new Date("1993-01-01T02:00:00");
+        // end now
+        const end = new Date("1993-01-02T02:00:00");
+
+        /** ---------------------------------------End--------------------------------------**/
+        view.when(() => {
+          layer.when(() => {
+            layer2.when(() => {
+              const legend = new Legend({
+                view: view,
+                layerInfos: [
+                  {
+                    layer: layer,
+                    title: "VHM0"
+                  },
+                  {
+                    layer: layer2,
+                    title: "VHM0"
+                  },
+                ]
+              });
+              // Add widget to the bottom right corner of the view
+              view.ui.add(legend, "top-right");
+              // time slider widget initialization
+              const timeSlider = new TimeSlider({
+                container: "timeSlider",
+                view: view,
+                mode: "instant",
+                timeVisible: true, // show the time stamps on the timeslider
+                fullTimeExtent: {
+                  start: layer.timeInfo.fullTimeExtent.start,
+                  end: layer2.timeInfo.fullTimeExtent.end,
+                },
+                stops: {
+                  count: (layer2.timeInfo.fullTimeExtent.end - layer.timeInfo.fullTimeExtent.start) / 1000 / 60 / 60,
+                },
+              });
+              timeSlider.watch("timeExtent", (timeExtent) => {
+                if (layer.timeInfo.fullTimeExtent.start <= timeExtent.start && timeExtent.start <= layer.timeInfo.fullTimeExtent.end) {
+                  layer.visible = true;
+                }
+                else {
+                  layer.visible = false;
+                }
+                if (layer2.timeInfo.fullTimeExtent.start <= timeExtent.start && timeExtent.start <= layer2.timeInfo.fullTimeExtent.end) {
+                  layer2.visible = true;
+                }
+                else {
+                  layer2.visible = false;
+                }
+              });
+            });
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+    <div id="timeSlider"></div>
+    <span id="layerToggle" class="esri-widget">
+      <input type="checkbox" id="yearly" checked /> Yearly
+    </span>
+  </body>
+</html>
