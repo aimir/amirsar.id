@@ -93,6 +93,72 @@
           VSDX: "Stokes drift U",
           VSDY: "Stokes drift V",
         }[param];
+        let scale_factor = {
+          latitude: 1,
+          longitude: 1,
+          time: 1,
+          VHM0: 0.001,
+          VTPK: 0.001,
+          VTM10: 0.001,
+          VTM02: 0.001,
+          VMDR: 0.01,
+          VHM0_WW: 0.001,
+          VTM01_WW: 0.001,
+          VMDR_WW: 0.01,
+          VPED: 0.01,
+          VHM0_SW1: 0.001,
+          VTM01_SW1: 0.001,
+          VMDR_SW1: 0.01,
+          VHM0_SW2: 0.001,
+          VTM01_SW2: 0.001,
+          VMDR_SW2: 0.01,
+          VSDX: 0.001,
+          VSDY: 0.001,
+        }[param];
+        let add_offset = {
+          latitude: 0.0,
+          longitude: 0.0,
+          time: 0.0,
+          VHM0: 0.0,
+          VTPK: 0.0,
+          VTM10: 0.0,
+          VTM02: 0.0,
+          VMDR: 180.0,
+          VHM0_WW: 0.0,
+          VTM01_WW: 0.0,
+          VMDR_WW: 180.0,
+          VPED: 180.0,
+          VHM0_SW1: 0.0,
+          VTM01_SW1: 0.0,
+          VMDR_SW1: 180.0,
+          VHM0_SW2: 0.0,
+          VTM01_SW2: 0.0,
+          VMDR_SW2: 180.0,
+          VSDX: 0.0,
+          VSDY: 0.0,
+        }[param];
+        let units = {
+          latitude: '',
+          longitude: '',
+          time: '',
+          VHM0: 'm',
+          VTPK: 's',
+          VTM10: 's',
+          VTM02: 's',
+          VMDR: 'degree',
+          VHM0_WW: 'm',
+          VTM01_WW: 's',
+          VMDR_WW: 'degree',
+          VPED: 'degree',
+          VHM0_SW1: 'm',
+          VTM01_SW1: 's',
+          VMDR_SW1: 'degree',
+          VHM0_SW2: 'm',
+          VTM01_SW2: 's',
+          VMDR_SW2: 'degree',
+          VSDX: 'm/s',
+          VSDY: 'm/s',
+        }[param];
         var layer = new WMSLayer({
           url: "https://my.cmems-du.eu/thredds/wms/med-hcmr-wav-rean-h",
           sublayers: [
@@ -311,15 +377,15 @@
                 if (contents.length > 0) {
                   contents[0].innerHTML = "";
                 }
+                view.popup.close();
                 jsdap.loadData("https://asarid:Ecothon2022@my.cmems-du.eu/thredds/dodsC/med-hcmr-wav-rean-h.dods?VHM0[" + hour + ":" + display_interval + ":" + (hour + 48 * display_interval) + "][" + lat + "][" + long + "]", async function(data) {
                   if(data[0][0][0][0] == -32767) {
-                    view.popup.close();
                     return;
                   }
                   view.popup.visible = true;
                   view.popup.open({
                     // Set the popup's title to the coordinates of the clicked location
-                    title: "Trend over 48 " + (document.getElementById("hourly").checked ? "hours" : "months"),
+                    title: "Trend over 48 " + (document.getElementById("hourly").checked ? "hours" : "months") + " (" + units + ")",
                     location: event.mapPoint, // Set the location of the popup to the clicked location
                     actions: []
                   });
@@ -328,7 +394,7 @@
                   }
                   Plotly.newPlot(document.getElementsByClassName("esri-popup__content")[0], [{
                     x: Array(49).keys(),
-                    y: data[0][0].map((val) => val[0][0]),
+                    y: data[0][0].map((val) => add_offset + scale_factor * val[0][0]),
                     type: 'scatter'
                   }], {
                     autosize: false,
