@@ -71,6 +71,9 @@
       ], function (Map, MapView, WMSLayer, TimeSlider, Legend, Expand, ImageryTileLayer, Point, MediaLayer, ImageElement, CornersGeoreference, LegendViewModel) {
         var url = new URL(window.location);
         let param = url.searchParams.get('param');
+        if (!["VHM0", "VTPK", "VTM10", "VTM02", "VMDR", "VHM0_WW", "VTM01_WW", "VMDR_WW", "VPED", "VHM0_SW1", "VTM01_SW1", "VMDR_SW1", "VHM0_SW2", "VTM01_SW2", "VMDR_SW2", "VSDX", "VSDY"].contains(param)) {
+          param = "VHM0";
+        }
         let title = {
           latitude: "latitude",
           longitude: "longitude",
