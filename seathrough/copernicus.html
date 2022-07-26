@@ -287,8 +287,8 @@
               let dates = [];
               for(let year=layer.timeInfo.fullTimeExtent.start.getUTCFullYear(); year <= layer2.timeInfo.fullTimeExtent.end.getUTCFullYear(); year++) {
                 for(let month=1; month <= 12; month++) {
-                  let month_start = new Date(year + '-' + month + '-01Z');
-                  let month_end = new Date((month==12?year+1:year) + '-' + (month%12+1) + '-01Z') - 60 * 60 * 1000;
+                  let month_start = new Date(year + '-' + (month<10?'0':'') + month + '-01T00:00:00Z');
+                  let month_end = new Date((month==12?year+1:year) + '-' + ((month%12+1)<10?'0':'') + (month%12+1) + '-01T00:00:00Z') - 60 * 60 * 1000;
                   if (layer.timeInfo.fullTimeExtent.start <= month_start && month_end <= layer2.timeInfo.fullTimeExtent.end) {
                     dates = dates.concat(month_start);
                   }
