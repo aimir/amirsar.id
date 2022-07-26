@@ -333,6 +333,34 @@
                   });
                 }
               });
+              document.getElementById("monthly").onclick=function() {
+                if (layer.timeInfo.fullTimeExtent.start <= timeSlider.timeExtent.start && timeSlider.timeExtent.start <= layer.timeInfo.fullTimeExtent.end) {
+                  layer.visible = document.getElementById("hourly").checked;
+                }
+                else {
+                  layer.visible = false;
+                }
+                if (layer2.timeInfo.fullTimeExtent.start <= timeSlider.timeExtent.start && timeSlider.timeExtent.start <= layer2.timeInfo.fullTimeExtent.end) {
+                  layer2.visible = document.getElementById("hourly").checked;
+                }
+                else {
+                  layer2.visible = false;
+                }
+                if(document.getElementById("hourly").checked) {
+                  timeSlider.stops = hourly;
+                  timeSlider.playRate = 1000;
+                  layers.forEach(function(curr_layer, index) {
+                    curr_layer.visible = false;
+                  });
+                }
+                else {
+                  timeSlider.stops = monthly;
+                  timeSlider.playRate = 5000;
+                  layers.forEach(function(curr_layer, index) {
+                    curr_layer.visible = (dates[index] <= timeSlider.timeExtent.start) && (timeSlider.timeExtent.start < dates[index + 1]);
+                  });
+                }
+              };
               document.getElementById("hourly").onclick=function() {
                 if (layer.timeInfo.fullTimeExtent.start <= timeSlider.timeExtent.start && timeSlider.timeExtent.start <= layer.timeInfo.fullTimeExtent.end) {
                   layer.visible = document.getElementById("hourly").checked;
@@ -424,7 +452,8 @@
     <div id="viewDiv"></div>
     <div id="timeSlider"></div>
     <span id="layerToggle" class="esri-widget">
-      <input type="checkbox" id="hourly"/> Hourly
+      <input type="radio" id="monthly" name="time" checked> Monthly
+      <input type="radio" id="hourly" name="time"> Hourly
     </span>
   </body>
 </html>
