@@ -1,0 +1,158 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <!--
+     ArcGIS API for JavaScript, https://js.arcgis.com
+     For more information about the widgets-timeslider sample,
+     read the original sample description at developers.arcgis.com.
+     https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider/index.html
+     -->
+    <title>Rogue Waves Analysis</title>
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.24/esri/themes/dark/main.css"
+    />
+    <script type="text/javascript" src="jsdap-8.1.0.js"></script>
+    <script src='https://cdn.plot.ly/plotly-2.12.1.min.js'></script>
+    <script src="/overrides/js.arcgis.com/4.24/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #sliderContainer {
+        position: absolute;
+        left: 20%;
+        right: 20%;
+        height: 100px;
+        width: 60%;
+        bottom: 20px;
+      }
+      #slider {
+        padding-left: 30px;
+        padding-right: 30px;
+      }
+      #layerToggle {
+        top: 15px;
+        right: 60px;
+        position: absolute;
+        z-index: 99;
+        border-radius: 8px;
+        padding-top: 5px;
+        padding-right: 8px;
+        padding-bottom: 5px;
+        padding-left: 2px;
+        opacity: 0.85;
+      }
+      .esri-view-width-xlarge .esri-popup__main-container,
+      .esri-view-width-large .esri-popup__main-container,
+      .esri-view-width-medium .esri-popup__main-container
+      {
+        width: 550px !important;
+      }‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍
+    </style>
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/WMSLayer",
+        "esri/widgets/Slider",
+        "esri/widgets/Legend",
+        "esri/widgets/Expand",
+        "esri/layers/ImageryTileLayer",
+        "esri/geometry/Point",
+        "esri/layers/MediaLayer",
+        "esri/layers/support/ImageElement",
+        "esri/layers/support/CornersGeoreference",
+        "esri/widgets/Legend/LegendViewModel",
+      ], function (Map, MapView, WMSLayer, Slider, Legend, Expand, ImageryTileLayer, Point, MediaLayer, ImageElement, CornersGeoreference, LegendViewModel) {
+        let layers = [];
+        for(let i=0; i < 20; i++) {
+          const image = new ImageElement({
+            image: "/rogue/rogue" + i + '.png',
+            georeference: new CornersGeoreference({
+              bottomRight: new Point({
+                x: 36.31250190734863,
+                y: 30.16666,
+                spatialReference: {
+                  wkid: 4326
+                }
+              }),
+              bottomLeft: new Point({
+                x: -18.145833015441895,
+                y: 30.16666,
+                spatialReference: {
+                  wkid: 4326
+                }
+              }),
+              topRight: new Point({
+                x: 36.31250190734863,
+                y: 46.00000,
+                spatialReference: {
+                  wkid: 4326
+                }
+              }),
+              topLeft: new Point({
+                x: -18.145833015441895,
+                y: 46.00000,
+                spatialReference: {
+                  wkid: 4326
+                }
+              })
+            })
+          });
+          layers = layers.concat(new MediaLayer({
+            source: [image],
+            visible: (i == 3),
+          }));
+        }
+        const map = new Map({
+          basemap: "hybrid",
+          layers: layers,
+        });
+        const view = new MapView({
+          map: map,
+          container: "viewDiv",
+          zoom: 7,
+          center: [34, 32.5],
+        });
+        const slider = new Slider({
+          container: "slider",
+          view: view,
+          mode: "instant",
+          min: 1,
+          max: 18,
+          values: [4],
+          steps: 1,
+          tickConfigs: [{
+            mode: "position",
+            values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+            labelsVisible: true,
+          }]
+        });
+        slider.on(['thumb-change', 'thumb-drag'], function(event) {
+          layers.forEach(layer => { layer.visible = false } );
+          layers[event.value].visible = true;
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+    <div id="sliderContainer">
+      <div style="position: absolute; width: 100%; color: rgb(209, 209, 209); font-family: 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif; padding-top: 10px; text-align: center">
+        AREA WITH AT LEAST THOSE MANY ROGUE WAVES PER MONTH (EXPECTED, ROUGH PREDICTION)
+      </div>
+      <div id="slider"></div>
+    </div>
+  </body>
+</html>
